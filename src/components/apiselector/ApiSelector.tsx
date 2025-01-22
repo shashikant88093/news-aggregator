@@ -10,9 +10,10 @@ import { ApiResponse } from "../../type/Api";
 
 const apiEndpoints = {
   newsApi:import.meta.env.VITE_NEWS_API,
-  guardianApi: import.meta.env.VITE_GUARDIAN_API,
-  newsdataApi: import.meta.env.VITE_NEWSDATA_API,
+  guardianApi: import.meta.env.VITE_GUARDIANAPI,
+  newsdataApi: import.meta.env.VITE_NEWS_API_DATA,
 };
+
 
 
 
