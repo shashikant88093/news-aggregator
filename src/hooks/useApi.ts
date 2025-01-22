@@ -25,7 +25,7 @@ const constructUrl = (
     // for paid users
     // return `${baseUrl}/archive?apikey=${apiKeys.newsdataApiKey}&q=${keyWord}&language=en&from_date=${date}&to_date=${date}`;
     return `${baseUrl}/latest?apikey=${apiKeys.newsdataApiKey}&q=${keyWord}&language=en`;
-  } else if (baseUrl === "https://newsapi.org/v2/everything") {
+  } else if (baseUrl === "https://newsapi.org/v2") {
     // https://newsapi.org/v2/everything?q=bitcoin&from=2023
     return `https://newsapi.org/v2/everything?q=${keyWord}&from=${date}&apiKey=${apiKeys.newsApiKey}`;
   }

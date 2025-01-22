@@ -16,7 +16,7 @@ const apiEndpoints = {
 
 
 
-
+console.log("API Endpoints:", apiEndpoints);
 const ApiSelector: React.FC = memo(() => {
   const [selectedApi, setSelectedApi] = useState<string>(apiEndpoints.guardianApi);
   const [apiData, setApiData] = useState<any[]>([]);
