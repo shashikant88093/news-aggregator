@@ -29,9 +29,7 @@ const ApiSelector: React.FC = memo(() => {
     keyWord: category,
   });
 
-  console.log(data,"data")
-  console.log(isLoading,"isLoading")
-  console.log(error,"error")
+  
 
   useEffect(() => {
     if (data?.articles?.length) {
