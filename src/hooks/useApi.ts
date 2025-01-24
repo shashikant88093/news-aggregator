@@ -2,37 +2,29 @@ import axios, { AxiosInstance } from "axios";
 import { useState, useEffect, useRef } from "react";
 import { ApiResponse } from "../type/Api";
 
-
-
+// API keys from environment variables
 const apiKeys = {
   newsApiKey: import.meta.env.VITE_NEWS_API_KEY,
   guardianApiKey: import.meta.env.VITE_GUARDIANAPI_KEY,
   newsdataApiKey: import.meta.env.VITE_NEWS_API_DATA_KEY,
 };
 
-// Handles API URL construction based on the endpoint
+// Function to construct the API URL based on the endpoint
 const constructUrl = (
   baseUrl: string,
   { date, keyWord }: { date?: string | null; keyWord?: string | null } = {}
 ): string => {
   if (baseUrl === "https://content.guardianapis.com") {
-    // https://content.guardianapis.com/search?tq=news&from-date=2014-01-01&api-key=d9081210-def2-420a-a331-57b67c014c07
-    return `${baseUrl}/tags?&q=${keyWord}&from-date=${date}&api-key=${apiKeys.guardianApiKey}`;
+    return `${baseUrl}/tags?q=${keyWord}&from-date=${date}&api-key=${apiKeys.guardianApiKey}`;
   } else if (baseUrl === "https://newsdata.io/api/1") {
-    // https://newsdata.io/api/1/archive?apikey=pub_66111e9b448f4d5e3d2080dded7e8293d6cd3&q=example&language=en&from_date=2023-01-19&to_date=2023-01-25
-    // https://newsdata.io/api/1/latest?apikey=pub_66111e9b448f4d5e3d2080dded7e8293d6cd3&q=sports&language=en
-    // use the latest endpoint for the latest news because archive endpoint is paid it only supports days filter
-    // for paid users
-    // return `${baseUrl}/archive?apikey=${apiKeys.newsdataApiKey}&q=${keyWord}&language=en&from_date=${date}&to_date=${date}`;
     return `${baseUrl}/latest?apikey=${apiKeys.newsdataApiKey}&q=${keyWord}&language=en`;
   } else if (baseUrl === "https://newsapi.org/v2") {
-    // https://newsapi.org/v2/everything?q=bitcoin&from=2023
-    return `https://newsapi.org/v2/everything?q=${keyWord}&from=${date}&apiKey=${apiKeys.newsApiKey}`;
+    return `${baseUrl}/everything?q=${keyWord}&from=${date}&apiKey=${apiKeys.newsApiKey}`;
   }
   return "";
 };
 
-// Custom React hook to fetch data
+// Custom React hook to fetch data from APIs
 const useApi = <T extends ApiResponse>(
   baseUrl: string,
   { date, keyWord }: { date?: string | null; keyWord?: string | null } = {}
@@ -40,34 +32,45 @@ const useApi = <T extends ApiResponse>(
   const [data, setData] = useState<T | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const axiosInstance = useRef<AxiosInstance>(axios.create());
+
+  // Create a reusable Axios instance with configurations
+  const axiosInstance = useRef<AxiosInstance>(
+    axios.create({
+      headers: {
+        Upgrade: "HTTP/2.0", // Use appropriate protocol upgrade if required by the server
+      },
+    })
+  );
 
   useEffect(() => {
     const fetchData = async () => {
       if (!baseUrl) return;
 
       setIsLoading(true);
+      setError(null); // Clear any previous error at the start of the API call
       const customUrl = constructUrl(baseUrl, { date, keyWord });
 
       try {
         const response = await axiosInstance.current.get(customUrl);
         const formattedData = formatApiResponse(baseUrl, response.data);
         setData(formattedData as T);
-      } catch (err) {
-        console.error("Error fetching data:", err);
-        setError(err instanceof Error ? err.message : "An error occurred");
+      } catch (err: any) {
+        console.error("Error fetching data:", err.response || err.message);
+        setError(
+          err.response?.data?.message || err.message || "An error occurred"
+        );
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchData();
-  }, [baseUrl, date, keyWord]);
+  }, [baseUrl, date, keyWord]); // Dependencies trigger new fetch when they change
 
   return { data, isLoading, error };
 };
 
-// Utility to format responses from various APIs
+// Utility function to format API responses
 const formatApiResponse = (baseUrl: string, rawData: any): ApiResponse => {
   if (baseUrl.startsWith("https://content.guardianapis.com")) {
     return {
@@ -120,15 +123,5 @@ const formatApiResponse = (baseUrl: string, rawData: any): ApiResponse => {
 
   throw new Error("Unsupported API endpoint");
 };
-
-// Standalone utility function for API calls
-// const apiCall = async (
-//   url: string,
-//   { date, keyWord }: { date?: string | null; keyWord?: string | null } = {}
-// ): Promise<ApiResponse> => {
-//   const customUrl = constructUrl(url, { date, keyWord });
-//   const response = await axios.get(customUrl);
-//   return formatApiResponse(url, response.data);
-// };
 
 export default useApi;

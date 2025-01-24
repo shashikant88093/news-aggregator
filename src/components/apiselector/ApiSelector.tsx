@@ -16,7 +16,7 @@ const apiEndpoints = {
 
 
 
-console.log("API Endpoints:", apiEndpoints);
+// console.log("API Endpoints:", apiEndpoints);
 const ApiSelector: React.FC = memo(() => {
   const [selectedApi, setSelectedApi] = useState<string>(apiEndpoints.guardianApi);
   const [apiData, setApiData] = useState<any[]>([]);
@@ -29,6 +29,10 @@ const ApiSelector: React.FC = memo(() => {
     keyWord: category,
   });
 
+  console.log(data,"data")
+  console.log(isLoading,"isLoading")
+  console.log(error,"error")
+
   useEffect(() => {
     if (data?.articles?.length) {
       setApiData(data.articles);
@@ -37,14 +41,13 @@ const ApiSelector: React.FC = memo(() => {
   }, [data]);
 
   const handleSearch = (keyword: string) => {
-    console.log("Search Keyword:", keyword);
 
     // Filter articles based on the title
     const filteredArticles = apiData.filter((article) => {
       return article.title.toLowerCase().includes(keyword.toLowerCase());
     });
 
-    console.log("Filtered Articles:", filteredArticles);
+    // console.log("Filtered Articles:", filteredArticles);
 
     // Set filtered data or reset if no articles match the keyword
     if (filteredArticles.length) {
